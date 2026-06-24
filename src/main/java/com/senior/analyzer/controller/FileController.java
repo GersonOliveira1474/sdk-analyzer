@@ -3,6 +3,10 @@ package com.senior.analyzer.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.swing.JFileChooser;
+import javax.swing.UIManager;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
@@ -19,6 +23,45 @@ public class FileController {
     @GetMapping("/health")
     public Map<String, String> health() {
         return Map.of("status", "ok");
+    }
+
+    @PostMapping("/file/select")
+    public ResponseEntity<?> selectFile() {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            JFileChooser chooser = new JFileChooser();
+            chooser.setDialogTitle("Selecionar arquivo de log");
+            chooser.setFileFilter(new FileNameExtensionFilter("Arquivos de log (*.log, *.txt, *.out)", "log", "txt", "out"));
+            chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+
+            int result = chooser.showOpenDialog(null);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File file = chooser.getSelectedFile();
+                return ResponseEntity.ok(Map.of("path", file.getAbsolutePath(), "name", file.getName()));
+            }
+            return ResponseEntity.ok(Map.of("cancelled", true));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/file/select-directory")
+    public ResponseEntity<?> selectDirectory() {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            JFileChooser chooser = new JFileChooser();
+            chooser.setDialogTitle("Selecionar diretório de logs");
+            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+
+            int result = chooser.showOpenDialog(null);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File dir = chooser.getSelectedFile();
+                return ResponseEntity.ok(Map.of("path", dir.getAbsolutePath(), "name", dir.getName()));
+            }
+            return ResponseEntity.ok(Map.of("cancelled", true));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()));
+        }
     }
 
     @PostMapping("/file/read")
