@@ -1,5 +1,20 @@
 @echo off
 title SDK Analyzer
+set "BASE_DIR=%~dp0"
+
+:: Lê java.home do updater.properties
+if exist "%BASE_DIR%updater.properties" (
+    for /f "usebackq tokens=1,* delims==" %%a in ("%BASE_DIR%updater.properties") do (
+        set "KEY=%%a"
+        set "VAL=%%b"
+        if "%%a"=="java.home" (
+            if exist "%%b\bin\java.exe" (
+                set "JAVA_CMD=%%b\bin\java.exe"
+                goto :run
+            )
+        )
+    )
+)
 
 :: Tenta usar JAVA_HOME se definido
 if defined JAVA_HOME (
@@ -31,14 +46,15 @@ for %%p in (
 echo ============================================
 echo   Java nao encontrado.
 echo.
-echo   Configure a variavel JAVA_HOME apontando
-echo   para o diretorio do Java instalado.
+echo   Configure java.home no updater.properties
+echo   ou a variavel JAVA_HOME do sistema.
 echo.
-echo   Exemplo: set JAVA_HOME=C:\Program Files\Java\jre-21
+echo   Exemplo no updater.properties:
+echo   java.home=C:\Program Files\Java\jre-21
 echo ============================================
 pause
 exit /b 1
 
 :run
 echo Iniciando SDK Analyzer...
-"%JAVA_CMD%" -jar "%~dp0sdk-analyzer.jar" %*
+"%JAVA_CMD%" -jar "%BASE_DIR%sdk-analyzer.jar" --spring.config.additional-location=file:%BASE_DIR%config.properties %*

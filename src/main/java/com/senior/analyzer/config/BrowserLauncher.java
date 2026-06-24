@@ -42,7 +42,10 @@ public class BrowserLauncher {
         log.info("  Local:    localhost:{}", port);
         log.info("═══════════════════════════════════════════════════");
 
-        openBrowser("http://localhost:" + port);
+        String openBrowser = env.getProperty("browser.open.on.start", "true");
+        if ("true".equalsIgnoreCase(openBrowser)) {
+            openBrowser("http://localhost:" + port);
+        }
     }
 
     private void openBrowser(String url) {
