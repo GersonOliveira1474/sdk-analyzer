@@ -34,3 +34,6 @@ build/
 
 ### Frontend build (gerado do sdk-insight) ###
 src/main/resources/static/
+
+### jpackage output ###
+installer/

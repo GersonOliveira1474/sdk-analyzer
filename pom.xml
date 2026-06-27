@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.senior</groupId>
 	<artifactId>sdk-analyzer</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>senior-watch</name>
 	<description>Senior Watch — Monitoramento e análise de logs Senior</description>
 	<url/>
@@ -47,6 +47,24 @@
 	</dependencies>
 
 	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+				<excludes>
+					<exclude>static/**</exclude>
+					<exclude>**/*.ico</exclude>
+				</excludes>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>false</filtering>
+				<includes>
+					<include>static/**</include>
+					<include>**/*.ico</include>
+				</includes>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
