@@ -71,6 +71,19 @@ public class RecentsController {
         return ResponseEntity.ok(recents);
     }
 
+    @PostMapping("/remove")
+    public ResponseEntity<?> removeRecent(@RequestBody Map<String, String> body) {
+        String filePath = body.get("path");
+        if (filePath == null || filePath.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "path is required"));
+        }
+
+        List<Map<String, Object>> recents = load();
+        recents.removeIf(entry -> filePath.equals(entry.get("path")));
+        save(recents);
+        return ResponseEntity.ok(recents);
+    }
+
     private List<Map<String, Object>> load() {
         if (!Files.exists(recentsFile)) return new ArrayList<>();
         try {

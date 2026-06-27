@@ -36,7 +36,7 @@ public class SystemTrayManager {
             String port = env.getProperty("server.port", "8080");
             String url = "http://localhost:" + port;
 
-            TrayIcon trayIcon = new TrayIcon(createIcon(), "SDK Analyzer");
+            TrayIcon trayIcon = new TrayIcon(createIcon(), "Senior Watch");
             trayIcon.setImageAutoSize(true);
 
             PopupMenu popup = new PopupMenu();

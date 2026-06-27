@@ -31,7 +31,7 @@ public class BrowserLauncher {
         String port = env.getProperty("server.port", "8080");
 
         log.info("═══════════════════════════════════════════════════");
-        log.info("  SDK Analyzer iniciado");
+        log.info("  Senior Watch iniciado");
         log.info("═══════════════════════════════════════════════════");
 
         List<String> ips = getLocalIPs();

@@ -11,8 +11,8 @@
 	<groupId>com.senior</groupId>
 	<artifactId>sdk-analyzer</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>sdk-analyzer</name>
-	<description>Analisador de Logs SDK</description>
+	<name>senior-watch</name>
+	<description>Senior Watch — Monitoramento e análise de logs Senior</description>
 	<url/>
 	<licenses>
 		<license/>

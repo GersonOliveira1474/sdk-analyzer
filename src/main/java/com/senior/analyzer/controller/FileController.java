@@ -85,6 +85,37 @@ public class FileController {
         }
     }
 
+    @PostMapping("/file/info")
+    public ResponseEntity<?> fileInfo(@RequestBody Map<String, String> body) {
+        String filePath = body.get("path");
+        if (filePath == null || filePath.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "path is required"));
+        }
+
+        Path path = Path.of(filePath);
+        boolean exists = Files.exists(path);
+
+        if (!exists) {
+            return ResponseEntity.ok(Map.of(
+                "path", filePath,
+                "name", path.getFileName().toString(),
+                "exists", false
+            ));
+        }
+
+        try {
+            return ResponseEntity.ok(Map.of(
+                "path", filePath,
+                "name", path.getFileName().toString(),
+                "size", Files.size(path),
+                "modified", Files.getLastModifiedTime(path).toMillis(),
+                "exists", true
+            ));
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @PostMapping("/file/list")
     public ResponseEntity<?> listFiles(@RequestBody Map<String, String> body) {
         String dirPath = body.get("path");
