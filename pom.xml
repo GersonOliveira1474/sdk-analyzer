@@ -50,19 +50,7 @@
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
-				<filtering>true</filtering>
-				<excludes>
-					<exclude>static/**</exclude>
-					<exclude>**/*.ico</exclude>
-				</excludes>
-			</resource>
-			<resource>
-				<directory>src/main/resources</directory>
 				<filtering>false</filtering>
-				<includes>
-					<include>static/**</include>
-					<include>**/*.ico</include>
-				</includes>
 			</resource>
 		</resources>
 		<plugins>
