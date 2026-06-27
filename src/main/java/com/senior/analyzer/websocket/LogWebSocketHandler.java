@@ -2,6 +2,7 @@ package com.senior.analyzer.websocket;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.senior.analyzer.service.AlertService;
 import com.senior.analyzer.service.FileWatcherService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,9 +77,15 @@ public class LogWebSocketHandler extends TextWebSocketHandler {
         Path path = Path.of(filePath);
 
         ctx.watcher.stop();
-        ctx.watcher = new FileWatcherService(line ->
-            sendJson(ctx.session, Map.of("type", "line", "data", line))
-        );
+        ctx.alertService.reset();
+        ctx.lineBuffer.clear();
+
+        ctx.watcher = new FileWatcherService(line -> {
+            sendJson(ctx.session, Map.of("type", "line", "data", line));
+            synchronized (ctx.lineBuffer) {
+                ctx.lineBuffer.add(line);
+            }
+        });
 
         List<String> lines = ctx.watcher.readBacklog(path, backlog);
         if (!lines.isEmpty()) {
@@ -86,6 +93,8 @@ public class LogWebSocketHandler extends TextWebSocketHandler {
         }
 
         ctx.watcher.start(path);
+
+        heartbeatExecutor.scheduleAtFixedRate(() -> evaluateAlerts(ctx), 5, 5, TimeUnit.SECONDS);
         log.info("Monitorando: {}", filePath);
 
         sendJson(ctx.session, Map.of(
@@ -101,6 +110,28 @@ public class LogWebSocketHandler extends TextWebSocketHandler {
         ctx.watcher.stop();
         log.info("Parou de monitorar: {}", file);
         sendJson(ctx.session, Map.of("type", "status", "watching", false, "file", "", "position", 0));
+    }
+
+    private void evaluateAlerts(SessionContext ctx) {
+        if (!ctx.session.isOpen()) return;
+        List<String> batch;
+        synchronized (ctx.lineBuffer) {
+            if (ctx.lineBuffer.isEmpty()) return;
+            batch = new java.util.ArrayList<>(ctx.lineBuffer);
+            ctx.lineBuffer.clear();
+        }
+
+        List<AlertService.Alert> alerts = ctx.alertService.processLines(batch);
+        for (AlertService.Alert alert : alerts) {
+            sendJson(ctx.session, Map.of(
+                "type", "alert",
+                "ruleId", alert.ruleId(),
+                "severity", alert.severity(),
+                "title", alert.title(),
+                "description", alert.description(),
+                "timestamp", alert.timestamp()
+            ));
+        }
     }
 
     private void sendHeartbeats() {
@@ -123,6 +154,8 @@ public class LogWebSocketHandler extends TextWebSocketHandler {
     private static class SessionContext {
         final WebSocketSession session;
         FileWatcherService watcher;
+        final AlertService alertService = new AlertService();
+        final List<String> lineBuffer = new java.util.ArrayList<>();
 
         SessionContext(WebSocketSession session) {
             this.session = session;
